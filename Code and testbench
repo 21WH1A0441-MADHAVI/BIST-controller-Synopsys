@@ -1,0 +1,63 @@
+1.Code for BIST Controller
+////// 4 bit Memory BIST Controller //////
+module bist(clk,rst,wr,rd,din,addl,addr,dout);
+input clk,rst,wr,rd;
+input [3:0] din;
+input [3:0] addl;
+output reg [3:0] dout,addr;
+reg [3:0] mem[0:15];
+integer i,j;
+always @(posedge clk)
+begin
+if (rst==1 & wr==1 & rd==0)
+begin
+for(i=0;i<16;i=i+1)
+begin
+for(j=0;j<4;j=j+1)
+begin
+mem[addl]=din;
+addr=mem[addl];
+end
+end
+end
+else if (rst==1 & wr==0 & rd==1)
+begin
+dout=mem[addl];
+end
+end
+endmodule
+
+
+//Code for the TestBench
+module bisttb;
+reg clk,rst,wr,rd;
+reg [3:0]din;
+reg [3:0]addl;
+wire [3:0]dout;
+wire [3:0]addr;
+bist G1(clk,rst,wr,rd,din,addl,addr,dout);
+initial begin
+clk=0;
+rst=0;
+wr=0;
+rd=0;
+addl=0;
+din=0;
+#100;
+end
+always begin
+#1 clk=~clk;
+#1 rst=1;
+#1 wr = 1;
+#1 rd = 0;
+#3 addl = addl+1;
+#4 din=din+1;
+end
+always begin
+#1 clk=~clk;
+#1 rst=1;
+#1 wr = 0;
+#1 rd = 1;
+#4 addl=addl+1;
+end
+endmodule
